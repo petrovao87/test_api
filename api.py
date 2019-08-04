@@ -1,4 +1,6 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
+from sqlalchemy import update
+import requests
 from flask_restful import reqparse, abort, Api, Resource
 from db import db_session, Process, ProcessPerformer #ProcessParameter, ProcessQuota, ProcessStartCondition
 
@@ -42,7 +44,7 @@ parser.add_argument('process_performer_id')
 #
 # # ProcessPerformer table
 # # parser.add_argument('process_performer_id') ####
-parser.add_argument('performer_name')
+# parser.add_argument('performer_name')
 # parser.add_argument('performer_description')
 #
 # # ProcessQuota
@@ -63,6 +65,7 @@ class Todo(Resource):
         # abort_if_todo_doesnt_exist(todo_id)
         # return TODOS[todo_id]
         # print(process_id)
+        ids = 0
         result = {}
         user_query = db_session.query(Process).join(ProcessPerformer).filter(Process.process_id == process_id).first()
         # print(user_query)
@@ -75,30 +78,44 @@ class Todo(Resource):
                                                                       'description': user_query.process_performer.performer_description}}
         return result
 
-    def delete(self, todo_id):
-        abort_if_todo_doesnt_exist(todo_id)
-        del TODOS[todo_id]
-        return '', 204
+    # def delete(self, todo_id):
+    #     abort_if_todo_doesnt_exist(todo_id)
+    #     del TODOS[todo_id]
+    #     return '', 204
 
     def put(self, process_id):
         args = parser.parse_args()
-        user_query = db_session.query(Process).join(ProcessPerformer).filter(Process.process_id == process_id).first()
+        # user_query = db_session.query(Process).join(ProcessPerformer).filter(Process.process_id == process_id)
+        # db_session.query(Process, ProcessPerformer).filter(Process.process_id == process_id).update(a)
+        # db_session.query(Process).filter(Process.process_id == process_id).update(args)
+
         # task = {'task': args['task']}
-        a = []
+        dict_to_update = {}
+        # coin = Process(request.form['data'])
+        # db_session.add(coin)
+        # db_session.commit()
+        # print(coin)
+        # db_session.add(coin)
+
+        # db_session.commit()
         print(locals())
         for i in args:
-            if args[i] is not None:
-                a.append(i)
-        # b = {}
-        for i in a:
             print(i)
-            print(user_query.process_name)
+            if args[i] is not None:
+                dict_to_update[i] = args[i]
+        print(dict_to_update)
+        db_session.query(Process).filter(Process.process_id == process_id).update(dict_to_update)
+        # process.update().values(a).where(Process.process_id == process_id)
+        db_session.commit()
+        for i in dict_to_update:
+            print(i)
+            # print(dir(user_query))
             # print(locals())
             # print(args[i])
             # user_query[i] = args[i]
             # print(user_query.i)
         # db_session.commit()
-        return a, 201
+        return dict_to_update, 201
         # TODOS[todo_id] = task
         # return task, 201
         # print(user_query)
@@ -142,11 +159,12 @@ class TodoList(Resource):
                 # filter(Process.process_id == process_id).first()
         # user_query.activity_flag =
         # print(args['todo_id'], args['task'])
-        perf = ProcessPerformer(process_performer_id=args.process_id, performer_name=args.performer_name, performer_description='description')
-        coin = Process(process_id=args.process_id, process_name=args.process_name, process_description='description', activity_flag='flag',
+        performer = ProcessPerformer(process_performer_id=args.process_id, performer_name=args.performer_name, performer_description='description')
+        process = Process(process_id=args.process_id, process_name=args.process_name, process_description='description', activity_flag='flag',
                        process_performer_id=args.process_performer_id)
-        db_session.add(perf)
-        db_session.add(coin)
+
+        db_session.add(performer)
+        db_session.add(process)
         db_session.commit()
         return args, 201
 
