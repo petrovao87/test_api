@@ -18,7 +18,7 @@ class Process(Base):
     id = Column(Integer, primary_key=True)
     process_id = Column(Integer, unique=True)
     process_name = Column(String(50))
-    description = Column(String())
+    process_description = Column(String())
     activity_flag = Column(String(50))
     # process_parameter = relationship('ProcessParameter')
     # process_start_condition = relationship('ProcessParameterCondition')
@@ -26,10 +26,10 @@ class Process(Base):
     process_performer = relationship('ProcessPerformer')
     # process_quota = relationship('ProcessQuota')
 
-    def __init__(self, process_id=None, process_name=None, description=None, activity_flag=None, process_performer_id=None):
+    def __init__(self, process_id=None, process_name=None, process_description=None, activity_flag=None, process_performer_id=None):
         self.process_id = process_id
         self.process_name = process_name
-        self.description = description
+        self.process_description = process_description
         self.activity_flag = activity_flag
         self.process_performer_id = process_performer_id
 
@@ -38,7 +38,7 @@ class Process(Base):
 #     __tablename__ = 'process_parameter'
 #     id = Column(Integer, primary_key=True)
 #     parameter_name = Column(String(50))
-#     value = Column(String(120))
+#     parameter_value = Column(String(120))
 #     process_id = Column(Integer, ForeignKey('process.id'))
 #
 #     def __init__(self, parameter_name=None, value=None, process_id=None):
@@ -51,7 +51,7 @@ class Process(Base):
 #     __tablename__ = 'process_start_condition'
 #     id = Column(Integer, primary_key=True)
 #     condition_type = Column(String(50))
-#     value = Column(String(120))
+#     condition_value = Column(String(120))
 #     process_id = Column(Integer, ForeignKey('process.id'))
 #
 #     def __init__(self, condition_type=None, value=None, process_id=None):
@@ -63,26 +63,26 @@ class Process(Base):
 class ProcessPerformer(Base):
     __tablename__ = 'process_performer'
     id = Column(Integer, primary_key=True)
-    process_performer_id_1 = Column(Integer, unique=True)
-    name = Column(String(120))
-    description = Column(String(120))
+    process_performer_id = Column(Integer, unique=True)
+    performer_name = Column(String(120))
+    performer_description = Column(String(120))
 
-    def __init__(self, process_performer_id_1=None, name=None, description=None):
-        self.process_performer_id_1 = process_performer_id_1
-        self.name = name
-        self.description = description
+    def __init__(self, process_performer_id=None, performer_name=None, performer_description=None):
+        self.process_performer_id = process_performer_id
+        self.performer_name = performer_name
+        self.performer_description = performer_description
 #
 #
 # class ProcessQuota(Base):
 #     __tablename__ = 'process_quota'
 #     id = Column(Integer, primary_key=True)
 #     quota_type = Column(String(50))
-#     value = Column(String(120))
+#     quota_value = Column(String(120))
 #     process_id = Column(Integer, ForeignKey('process.id'))
 #
-#     def __init__(self, quota_type=None, value=None, process_id=None):
+#     def __init__(self, quota_type=None, quota_value=None, process_id=None):
 #         self.quota_type = quota_type
-#         self.value = value
+#         self.quota_value = quota_value
 #         self.process_id = process_id
 
 
