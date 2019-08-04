@@ -232,24 +232,26 @@ class ProcessesList(Resource):
         args = parser.parse_args()
         user_query = db_session.query(ProcessPerformer).filter(ProcessPerformer.process_performer_id == args.process_performer_id).first()
         print(user_query)
-        process = Process(process_id=args.process_id, process_name=args.process_name, process_description='description', activity_flag='flag', process_performer_id=args.process_performer_id)
+        process = Process(process_id=args.process_id, process_name=args.process_name, process_description=args.process_description, activity_flag=args.activity_flag, process_performer_id=args.process_performer_id)
         parameter = ProcessParameter(parameter_name=args.parameter_name, parameter_value=args.parameter_value, process_id=args.process_id)
         start_condition = ProcessStartCondition(condition_type=args.condition_type, condition_value=args.condition_value, process_id=args.process_id)
-        performer = ProcessPerformer(process_performer_id=args.process_performer_id, performer_name=args.performer_name, performer_description='description')
+        performer = ProcessPerformer(process_performer_id=args.process_performer_id, performer_name=args.performer_name, performer_description=args.performer_description)
         quota = ProcessQuota(quota_type=args.quota_type, quota_value=args.quota_value, process_id=args.process_id)
         print(args)
         print(performer)
 
-        if user_query is None:
-            db_session.add(performer)
+        # if user_query is None:
+        # db_session.add(performer)
+        # db_session.commit()
         db_session.add(process)
         db_session.add(parameter)
         db_session.add(start_condition)
         db_session.add(quota)
-        try:
-            db_session.commit()
-        except exc.IntegrityError:
-           abort(404, message="Some parameters is already exist in DB")
+        db_session.add(process)
+        # try:
+        db_session.commit()
+        # except exc.IntegrityError:
+        #    abort(404, message="Some parameters is already exist in DB")
         return args, 200
 
 
