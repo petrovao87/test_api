@@ -1,8 +1,8 @@
 from flask import Flask, jsonify, request
-from sqlalchemy import update
+from sqlalchemy import update, exc
 import requests
 from flask_restful import reqparse, abort, Api, Resource
-from db import db_session, Process, ProcessPerformer #ProcessParameter, ProcessQuota, ProcessStartCondition
+from db import db_session, Process, ProcessPerformer, ProcessParameter, ProcessQuota, ProcessStartCondition
 
 from requests import put, get
 
@@ -24,32 +24,34 @@ def abort_if_process_doesnt_exist(process_id, processes):
 
 parser = reqparse.RequestParser()
 
-# Process table
 # parser.add_argument('task')
 # parser.add_argument('todo_id')
-parser.add_argument('process_id')# process_id todo_id
+
+# Process table
+parser.add_argument('process_id')# process_id
 parser.add_argument('process_name')
-# parser.add_argument('process_description')
-# parser.add_argument('activity_flag')
+parser.add_argument('process_description')
+parser.add_argument('activity_flag')
 parser.add_argument('process_performer_id')
 #
 # # ProcessParameter table
-# parser.add_argument('parameter_name')
-# parser.add_argument('parameter_value')
+parser.add_argument('parameter_name')
+parser.add_argument('parameter_value')
 # # parser.add_argument('process_id') #####
 #
 # # ProcessStartCondition table
-# parser.add_argument('condition_type')
+parser.add_argument('condition_type')
+parser.add_argument('condition_value')
 # # parser.add_argument('process_id') #####
 #
 # # ProcessPerformer table
 # # parser.add_argument('process_performer_id') ####
-# parser.add_argument('performer_name')
-# parser.add_argument('performer_description')
+parser.add_argument('performer_name')
+parser.add_argument('performer_description')
 #
 # # ProcessQuota
-# parser.add_argument('quota_type')
-# parser.add_argument('quota_value')
+parser.add_argument('quota_type')
+parser.add_argument('quota_value')
 # # parser.add_argument('process_id') #####
 
 
@@ -60,44 +62,74 @@ parser.add_argument('process_performer_id')
 
 # Todo
 # shows a single todo item and lets you delete a todo item
-class Todo(Resource):
+class Processes(Resource):
     def get(self, process_id):
         # abort_if_todo_doesnt_exist(todo_id)
         # return TODOS[todo_id]
         # print(process_id)
         ids = 0
         result = {}
-        user_query = db_session.query(Process).join(ProcessPerformer).filter(Process.process_id == process_id).first()
-        # print(user_query)
-        result['process_id ' + str(user_query.process_id)] = {'process_name': user_query.process_name,
-                                                                 'description': user_query.process_description,
-                                                                 'activity_flag': user_query.activity_flag,
-                                                                 'process_performer':
-                                                                     {'process_performer_id': user_query.process_performer_id,
-                                                                      'name': user_query.process_performer.performer_name,
-                                                                      'description': user_query.process_performer.performer_description}}
-        return result
+        # user_query = db_session.query(Process).join(ProcessPerformer).filter(Process.process_id == process_id).first()
+        # # print(user_query)
+        # result['process_id ' + str(user_query.process_id)] = {'process_name': user_query.process_name,
+        #                                                          'description': user_query.process_description,
+        #                                                          'activity_flag': user_query.activity_flag,
+        #                                                          'process_performer':
+        #                                                              {'process_performer_id': user_query.process_performer_id,
+        #                                                               'name': user_query.process_performer.performer_name,
+        #                                                               'description': user_query.process_performer.performer_description}}
+
+
+        user_query = db_session.query(Process).join(ProcessParameter). \
+            filter(Process.id == process_id)
+        user_query = user_query.join(ProcessStartCondition). \
+            filter(Process.id == process_id)
+        user_query = user_query.join(ProcessPerformer). \
+            filter(Process.process_id == process_id)
+        user_query = user_query.join(ProcessQuota). \
+            filter(Process.id == process_id).first()
+
+        if user_query is not None:
+            result['process_id ' + str(user_query.process_id)] = \
+                {'process_id': user_query.process_id,
+                 'process_name': user_query.process_name,
+                 'description': user_query.process_description,
+                 'activity_flag': user_query.activity_flag,
+                 'process_parameter':
+                     {'parameter_name': user_query.process_parameter[0].parameter_name,
+                      'parameter_value': user_query.process_parameter[0].parameter_value},
+                 'process_start_condition':
+                     {'condition_type': user_query.process_start_condition[0].condition_type,
+                      'condition_value': user_query.process_start_condition[0].condition_value},
+                 'process_performer':
+                     {'process_performer_id': user_query.process_performer.process_performer_id,
+                      'name': user_query.process_performer.performer_name,
+                      'description': user_query.process_performer.performer_description},
+                 'process_quota':
+                     {'quota_type': user_query.process_quota[0].quota_type,
+                      'quota_value': user_query.process_quota[0].quota_value}}
+            return result
+        else:
+            return abort(404, message="process {} doesn't exist".format(process_id))
 
     # def delete(self, todo_id):
     #     abort_if_todo_doesnt_exist(todo_id)
     #     del TODOS[todo_id]
     #     return '', 204
-
+class ProcessesUpdate(Resource):
     def put(self, process_id):
         args = parser.parse_args()
         # user_query = db_session.query(Process).join(ProcessPerformer).filter(Process.process_id == process_id)
         # db_session.query(Process, ProcessPerformer).filter(Process.process_id == process_id).update(a)
         # db_session.query(Process).filter(Process.process_id == process_id).update(args)
-
         # task = {'task': args['task']}
-        dict_to_update = {}
         # coin = Process(request.form['data'])
         # db_session.add(coin)
         # db_session.commit()
         # print(coin)
         # db_session.add(coin)
-
         # db_session.commit()
+        dict_to_update = {}
         print(locals())
         for i in args:
             print(i)
@@ -115,32 +147,114 @@ class Todo(Resource):
             # user_query[i] = args[i]
             # print(user_query.i)
         # db_session.commit()
+
         return dict_to_update, 201
         # TODOS[todo_id] = task
         # return task, 201
         # print(user_query)
         # abort_if_process_doesnt_exist(process_id, user_query)
 
+class ProcessesParameterUpdate(Resource):
+    def put(self, process_id):
+        args = parser.parse_args()
+        dict_to_update = {}
+        for i in args:
+            if args[i] is not None:
+                dict_to_update[i] = args[i]
+        user_query = db_session.query(ProcessParameter).filter(ProcessParameter.process_id == process_id)
+        try:
+            user_query.update(dict_to_update)
+        except exc.OperationalError:
+            abort(404, message="process {} has not this argument".format(process_id))
+        for i in dict_to_update:
+            print(i)
+        result = {}
+        user_query = user_query.first()
+        if user_query is not None:
+            db_session.commit()
+            result['process_id ' + str(user_query.process_id)] = \
+                {'process_parameter':
+                     {'parameter_name': user_query.parameter_name,
+                      'parameter_value': user_query.parameter_value}
+                 }
+            return result, 201
+        else:
+            return abort(404, message="process {} doesn't exist".format(process_id))
 
+
+class ProcessesStartConditionUpdate(Resource):
+    def put(self, process_id):
+        args = parser.parse_args()
+        dict_to_update = {}
+        for i in args:
+            if args[i] is not None:
+                dict_to_update[i] = args[i]
+        user_query = db_session.query(ProcessStartCondition).filter(ProcessStartCondition.process_id == process_id)
+        try:
+            user_query.update(dict_to_update)
+        except exc.OperationalError:
+            abort(404, message="process {} has not this argument".format(process_id))
+        for i in dict_to_update:
+            print(i)
+        result = {}
+        user_query = user_query.first()
+        if user_query is not None:
+            db_session.commit()
+            result['process_id ' + str(user_query.process_id)] = \
+                {'process_start_condition':
+                    {'condition_type': user_query.condition_type,
+                     'condition_value': user_query.condition_value}
+                 }
+            return result, 201
+        else:
+            return abort(404, message="process {} doesn't exist".format(process_id))
 
 
 # TodoList
 # shows a list of all todos, and lets you POST to add new tasks
-class TodoList(Resource):
+
+
+class ProcessesList(Resource):
     def get(self):
         # return TODOS
         result = {}
-        user_query = db_session.query(Process).join(ProcessPerformer).filter(
-            Process.process_performer_id == ProcessPerformer.id).all()
+        # user_query = db_session.query(Process).join(ProcessPerformer).\
+        #     filter(Process.process_performer_id == ProcessPerformer.id).all()
+        # print(user_query[0].process_performer.performer_name)
+
+        user_query = db_session.query(Process).join(ProcessParameter). \
+            filter(Process.id == ProcessParameter.process_id)
+        user_query = user_query.join(ProcessStartCondition). \
+            filter(Process.id == ProcessStartCondition.process_id)
+        user_query = user_query.join(ProcessPerformer). \
+            filter(Process.process_performer_id == ProcessPerformer.id)
+        user_query = user_query.join(ProcessQuota). \
+            filter(Process.id == ProcessQuota.process_id).all()
+
+
+        print(user_query[0].process_start_condition[0].condition_type,
+              user_query[0].process_parameter[0].parameter_name,
+              user_query[0].process_quota[0].quota_value)
+
         for i in range(len(user_query)):
-            result['process_id ' + str(user_query[i].process_id)] = {'process_name': user_query[i].process_name,
-                                                                     'description': user_query[i].process_description,
-                                                                     'activity_flag': user_query[i].activity_flag,
-                                                                     'process_performer':
-                                                                         {'process_performer_id':
-                                                                              user_query[i].process_performer_id},
-                                                                     'name': user_query[i].process_performer.performer_name,
-                                                                     'description': user_query[i].process_performer.performer_description}
+            result['process_id ' + str(user_query[i].process_id)] = \
+                {'process_id': user_query[i].process_id,
+                 'process_name': user_query[i].process_name,
+                 'description': user_query[i].process_description,
+                 'activity_flag': user_query[i].activity_flag,
+                 'process_parameter':
+                     {'parameter_name': user_query[i].process_parameter[0].parameter_name,
+                      'parameter_value':  user_query[i].process_parameter[0].parameter_value},
+                 'process_start_condition':
+                     {'condition_type': user_query[i].process_start_condition[0].condition_type,
+                      'condition_value': user_query[i].process_start_condition[0].condition_value},
+                 'process_performer':
+                     {'process_performer_id': user_query[i].process_performer.process_performer_id,
+                      'name': user_query[i].process_performer.performer_name,
+                      'description': user_query[i].process_performer.performer_description},
+                 'process_quota':
+                     {'quota_type': user_query[i].process_quota[0].quota_type,
+                      'quota_value': user_query[i].process_quota[0].quota_value}}
         return result
 
 
@@ -159,21 +273,33 @@ class TodoList(Resource):
                 # filter(Process.process_id == process_id).first()
         # user_query.activity_flag =
         # print(args['todo_id'], args['task'])
-        performer = ProcessPerformer(process_performer_id=args.process_id, performer_name=args.performer_name, performer_description='description')
-        process = Process(process_id=args.process_id, process_name=args.process_name, process_description='description', activity_flag='flag',
-                       process_performer_id=args.process_performer_id)
-
-        db_session.add(performer)
+        user_query = db_session.query(ProcessPerformer).filter(ProcessPerformer.process_performer_id == args.process_performer_id).first()
+        process = Process(process_id=args.process_id, process_name=args.process_name, process_description='description', activity_flag='flag', process_performer_id=args.process_performer_id)
+        parameter = ProcessParameter(parameter_name=args.parameter_name, parameter_value=args.parameter_value, process_id=args.process_id)
+        start_condition = ProcessStartCondition(condition_type=args.condition_type, condition_value=args.condition_value, process_id=args.process_id)
+        performer = ProcessPerformer(process_performer_id=args.process_performer_id, performer_name=args.performer_name, performer_description='description')
+        quota = ProcessQuota(quota_type=args.quota_type, quota_value=args.quota_value, process_id=args.process_id)
+        if user_query.process_performer_id is None:
+            db_session.add(performer)
         db_session.add(process)
-        db_session.commit()
+        db_session.add(parameter)
+        db_session.add(start_condition)
+        db_session.add(quota)
+        try:
+            db_session.commit()
+        except exc.IntegrityError:
+            abort(404, message="Some parameters is already exist in DB")
         return args, 201
 
 
 ##
 ## Actually setup the Api resource routing here
 ##
-api.add_resource(TodoList, '/todos')
-api.add_resource(Todo, '/todos/<process_id>')
+api.add_resource(ProcessesList, '/processes')
+api.add_resource(Processes, '/processes/<process_id>')
+api.add_resource(ProcessesParameterUpdate, '/processes/update/process_parameter/<process_id>')
+api.add_resource(ProcessesStartConditionUpdate, '/processes/update/process_start_condition/<process_id>')
+
 
 
 if __name__ == '__main__':
