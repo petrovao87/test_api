@@ -22,7 +22,7 @@ class Process(Base):
     process_parameter = relationship('ProcessParameter')
     process_start_condition = relationship('ProcessStartCondition')
     process_performer_id = Column(Integer, ForeignKey('process_performer.id'))
-    process_performer = relationship('ProcessPerformer')
+    # process_performer = relationship('ProcessPerformer')
     process_quota = relationship('ProcessQuota')
 
     def __init__(self, process_id=None, process_name=None, process_description=None, activity_flag=None, process_performer_id=None):
@@ -65,6 +65,7 @@ class ProcessPerformer(Base):
     process_performer_id = Column(Integer, unique=True)
     performer_name = Column(String(120))
     performer_description = Column(String(120))
+    process_performer = relationship('Process')
 
     def __init__(self, process_performer_id=None, performer_name=None, performer_description=None):
         self.process_performer_id = process_performer_id

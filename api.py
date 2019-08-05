@@ -238,20 +238,20 @@ class ProcessesList(Resource):
         performer = ProcessPerformer(process_performer_id=args.process_performer_id, performer_name=args.performer_name, performer_description=args.performer_description)
         quota = ProcessQuota(quota_type=args.quota_type, quota_value=args.quota_value, process_id=args.process_id)
         print(args)
-        print(performer)
+        print(performer.process_performer_id)
+        print(process.process_performer_id)
 
-        # if user_query is None:
-        # db_session.add(performer)
-        # db_session.commit()
+        if user_query is None:
+            db_session.add(performer)
+            # db_session.commit()
+        db_session.add(start_condition)
         db_session.add(process)
         db_session.add(parameter)
-        db_session.add(start_condition)
         db_session.add(quota)
-        db_session.add(process)
-        # try:
-        db_session.commit()
-        # except exc.IntegrityError:
-        #    abort(404, message="Some parameters is already exist in DB")
+        try:
+            db_session.commit()
+        except exc.IntegrityError:
+           abort(404, message="Some parameters is already exist in DB")
         return args, 200
 
 
