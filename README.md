@@ -1,6 +1,6 @@
 # test_API
 
-## This application allows you to analyze the particle size of the alloys from the image obtained with an electron microscope.
+## This application allows you to work with simple API.
 
 ## Setting up
 
