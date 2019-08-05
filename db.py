@@ -4,8 +4,8 @@ from sqlalchemy import create_engine, Column, Integer, String, Float, Text, Date
 from sqlalchemy.orm import scoped_session, sessionmaker, relationship
 from sqlalchemy.ext.declarative import declarative_base
 
-# engine = create_engine('postgresql://postgres:Passw0rd@localhost/process_db')
-engine = create_engine('sqlite:///process_db.db')
+engine = create_engine('postgresql://postgres:Passw0rd@localhost/process_db')
+# engine = create_engine('sqlite:///process_db.db')
 db_session = scoped_session(sessionmaker(bind=engine))
 
 Base = declarative_base()
