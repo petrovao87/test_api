@@ -4,8 +4,8 @@ from sqlalchemy import create_engine, Column, Integer, String, Float, Text, Date
 from sqlalchemy.orm import scoped_session, sessionmaker, relationship
 from sqlalchemy.ext.declarative import declarative_base
 
-engine = create_engine('postgresql://postgres:Passw0rd@localhost/process_db')
-# engine = create_engine('sqlite:///process_db.db')
+# engine = create_engine('postgresql://postgres:Passw0rd@localhost/process_db')
+engine = create_engine('sqlite:///process_db.db')
 db_session = scoped_session(sessionmaker(bind=engine))
 
 Base = declarative_base()
@@ -21,8 +21,8 @@ class Process(Base):
     activity_flag = Column(String(50))
     process_parameter = relationship('ProcessParameter')
     process_start_condition = relationship('ProcessStartCondition')
-    process_performer_id = Column(Integer, ForeignKey('process_performer.id'))
-    # process_performer = relationship('ProcessPerformer')
+    process_performer_id = Column(Integer, ForeignKey('process_performer.process_performer_id'))
+    process_performer = relationship('ProcessPerformer')
     process_quota = relationship('ProcessQuota')
 
     def __init__(self, process_id=None, process_name=None, process_description=None, activity_flag=None, process_performer_id=None):
@@ -38,7 +38,7 @@ class ProcessParameter(Base):
     id = Column(Integer, primary_key=True)
     parameter_name = Column(String(50))
     parameter_value = Column(String(120))
-    process_id = Column(Integer, ForeignKey('process.id'))
+    process_id = Column(Integer, ForeignKey('process.process_id'))
 
     def __init__(self, parameter_name=None, parameter_value=None, process_id=None):
         self.parameter_name = parameter_name
@@ -51,7 +51,7 @@ class ProcessStartCondition(Base):
     id = Column(Integer, primary_key=True)
     condition_type = Column(String(50))
     condition_value = Column(String(120))
-    process_id = Column(Integer, ForeignKey('process.id'))
+    process_id = Column(Integer, ForeignKey('process.process_id'))
 
     def __init__(self, condition_type=None, condition_value=None, process_id=None):
         self.condition_type = condition_type
@@ -78,7 +78,7 @@ class ProcessQuota(Base):
     id = Column(Integer, primary_key=True)
     quota_type = Column(String(50))
     quota_value = Column(String(120))
-    process_id = Column(Integer, ForeignKey('process.id'))
+    process_id = Column(Integer, ForeignKey('process.process_id'))
 
     def __init__(self, quota_type=None, quota_value=None, process_id=None):
         self.quota_type = quota_type

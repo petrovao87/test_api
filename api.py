@@ -44,14 +44,13 @@ parser.add_argument('quota_value')
 class Processes(Resource):
     def get(self, process_id):
         result = {}
-        user_query = db_session.query(Process).join(ProcessParameter). \
-            filter(Process.id == process_id)
-        user_query = user_query.join(ProcessStartCondition). \
-            filter(Process.id == process_id)
-        user_query = user_query.join(ProcessPerformer). \
-            filter(Process.process_id == process_id)
-        user_query = user_query.join(ProcessQuota). \
-            filter(Process.id == process_id).first()
+        user_query = db_session.query(Process).join(ProcessParameter)
+        user_query = user_query.join(ProcessStartCondition)
+        # print(user_query.condition_type)
+
+        user_query = user_query.join(ProcessPerformer)
+        # print(user_query.process_performer.process_performer_id)
+        user_query = user_query.join(ProcessQuota).filter(Process.process_id == process_id).first()
 
         if user_query is not None:
             result['process_id ' + str(user_query.process_id)] = \
@@ -66,7 +65,7 @@ class Processes(Resource):
                      {'condition_type': user_query.process_start_condition[0].condition_type,
                       'condition_value': user_query.process_start_condition[0].condition_value},
                  'process_performer':
-                     {'process_performer_id': user_query.process_performer.process_performer_id,
+                     {'process_performer_id': user_query.process_performer_id,
                       'performer_name': user_query.process_performer.performer_name,
                       'performer_description': user_query.process_performer.performer_description},
                  'process_quota':
@@ -199,14 +198,10 @@ class ProcessesQuota(Resource):
 class ProcessesList(Resource):
     def get(self):
         result = []
-        user_query = db_session.query(Process).join(ProcessParameter). \
-            filter(Process.id == ProcessParameter.process_id)
-        user_query = user_query.join(ProcessStartCondition). \
-            filter(Process.id == ProcessStartCondition.process_id)
-        user_query = user_query.join(ProcessPerformer). \
-            filter(Process.process_performer_id == ProcessPerformer.id)
-        user_query = user_query.join(ProcessQuota). \
-            filter(Process.id == ProcessQuota.process_id).all()
+        user_query = db_session.query(Process).join(ProcessParameter)
+        user_query = user_query.join(ProcessStartCondition)
+        user_query = user_query.join(ProcessPerformer)
+        user_query = user_query.join(ProcessQuota).all()
 
         for i in range(len(user_query)):
             result.append({'process_id': user_query[i].process_id,
@@ -231,15 +226,11 @@ class ProcessesList(Resource):
     def post(self):
         args = parser.parse_args()
         user_query = db_session.query(ProcessPerformer).filter(ProcessPerformer.process_performer_id == args.process_performer_id).first()
-        print(user_query)
         process = Process(process_id=args.process_id, process_name=args.process_name, process_description=args.process_description, activity_flag=args.activity_flag, process_performer_id=args.process_performer_id)
         parameter = ProcessParameter(parameter_name=args.parameter_name, parameter_value=args.parameter_value, process_id=args.process_id)
         start_condition = ProcessStartCondition(condition_type=args.condition_type, condition_value=args.condition_value, process_id=args.process_id)
         performer = ProcessPerformer(process_performer_id=args.process_performer_id, performer_name=args.performer_name, performer_description=args.performer_description)
         quota = ProcessQuota(quota_type=args.quota_type, quota_value=args.quota_value, process_id=args.process_id)
-        print(args)
-        print(performer.process_performer_id)
-        print(process.process_performer_id)
 
         if user_query is None:
             db_session.add(performer)
@@ -255,18 +246,42 @@ class ProcessesList(Resource):
         return args, 200
 
 
+class ProcessesDelete(Resource):
+    def delete(self, process_id):
+        user_query = db_session.query(Process).filter(Process.process_id == process_id)
+        if len(user_query.all()) == 0:
+            return abort(404, message="process {} doesn't exist".format(process_id))
+        performer = user_query.first().process_performer_id
+        processes_count = db_session.query(Process).filter(Process.process_performer_id == performer).all()
+        if len(processes_count) > 1:
+            db_session.query(Process).filter(Process.process_id == process_id).delete()
+            db_session.query(ProcessParameter).filter(ProcessParameter.process_id == process_id).delete()
+            db_session.query(ProcessStartCondition).filter(ProcessStartCondition.process_id == process_id).delete()
+            db_session.query(ProcessQuota).filter(ProcessQuota.process_id == process_id).delete()
+            db_session.commit()
+        else:
+            db_session.query(ProcessPerformer).filter(ProcessPerformer.process_performer_id == performer).delete()
+            db_session.query(Process).filter(Process.process_id == process_id).delete()
+            db_session.query(ProcessParameter).filter(ProcessParameter.process_id == process_id).delete()
+            db_session.query(ProcessStartCondition).filter(ProcessStartCondition.process_id == process_id).delete()
+            db_session.query(ProcessQuota).filter(ProcessQuota.process_id == process_id).delete()
+            db_session.commit()
+        return '', 200
+
+
 #
 # Actually setup the Api resource routing here
 #
-api.add_resource(ProcessesList, '/processes')
-api.add_resource(Processes, '/processes/<process_id>')
-api.add_resource(ProcessesParameterUpdate, '/processes/update/process_parameter/<process_id>')
-api.add_resource(ProcessesStartConditionUpdate, '/processes/update/process_start_condition/<process_id>')
-api.add_resource(ProcessesPerformer, '/processes/update/process_performer/<process_id>')
-api.add_resource(ProcessesQuota, '/processes/update/process_quota/<process_id>')
+api.add_resource(ProcessesList, '/api/v1/processes')
+api.add_resource(Processes, '/api/v1/processes/<process_id>')
+api.add_resource(ProcessesParameterUpdate, '/api/v1/processes/update/process_parameter/<process_id>')
+api.add_resource(ProcessesStartConditionUpdate, '/api/v1/processes/update/process_start_condition/<process_id>')
+api.add_resource(ProcessesPerformer, '/api/v1/processes/update/process_performer/<process_id>')
+api.add_resource(ProcessesQuota, '/api/v1/processes/update/process_quota/<process_id>')
+api.add_resource(ProcessesDelete, '/api/v1/processes/delete/process/<process_id>')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
 
 
 
