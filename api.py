@@ -88,8 +88,14 @@ class ProcessesUpdate(Resource):
         for i in args:
             if args[i] is not None:
                 dict_to_update[i] = args[i]
-        db_session.query(Process).filter(Process.process_id == process_id).update(dict_to_update)
-        db_session.commit()
+        process_performer_id = dict_to_update.get('process_performer_id')
+        user_query = db_session.query(ProcessPerformer).\
+            filter(ProcessPerformer.process_performer_id == process_performer_id).first()
+        if user_query is not None or process_performer_id is None:
+            db_session.query(Process).filter(Process.process_id == process_id).update(dict_to_update)
+            db_session.commit()
+        else:
+            return abort(404, message="process performer {} doesn't exist".format(process_performer_id))
         return dict_to_update, 201
 
 
@@ -282,6 +288,7 @@ class ProcessesDelete(Resource):
 #
 api.add_resource(ProcessesList, '/api/v1/processes')
 api.add_resource(Processes, '/api/v1/processes/<process_id>')
+api.add_resource(ProcessesUpdate, '/api/v1/processes/update/process/<process_id>')
 api.add_resource(ProcessesParameterUpdate, '/api/v1/processes/update/process_parameter/<process_id>')
 api.add_resource(ProcessesStartConditionUpdate, '/api/v1/processes/update/process_start_condition/<process_id>')
 api.add_resource(ProcessesPerformer, '/api/v1/processes/update/process_performer/<process_id>')
