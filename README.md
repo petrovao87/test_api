@@ -49,6 +49,7 @@ $ python api.py
 ```
 
 ### Update a task
+
 #####Update value in tables: Process Parameter, Process Start Condition, Process Performer and Process Quota
 ```
 /api/v1/processes/update/process_parameter/<process_id>
@@ -81,6 +82,9 @@ quota_value (String)
 ##### for example:
 
 ```
+from requests import post
+
+
 url = 'http://localhost:5000/api/v1/processes'
 data = {'process_id': 1,
         'process_name': 'process_name',
