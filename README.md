@@ -1,6 +1,6 @@
 # test_API
 
-## This application allows you to work with simple API.
+### This application allows you to work with simple API.
 
 ## Setting up
 
@@ -27,28 +27,28 @@ engine = create_engine('postgresql://USERNAME:PASSWORD@localhost/YOUR_DB_NAME)
 ```
 $ python db.py
 ```
-# test_API methods:
-## Running the app
+## test_API methods:
+### Running the app
 ```
 $ python api.py
 ```
 
-## GET the list of all Processes
+### GET the list of all Processes
 ```
 /api/v1/processes
 ```
 
-## GET a single process
+### GET a single process
 ```
 /api/v1/processes/<process_id>
 ```
 
-## DELETE a task
+### DELETE a task
 ```
 /api/v1/processes/delete/process/<process_id>
 ```
 
-## Update a task
+### Update a task
 #####Update value in tables: Process Parameter, Process Start Condition, Process Performer and Process Quota
 ```
 /api/v1/processes/update/process_parameter/<process_id>
@@ -57,11 +57,11 @@ $ python api.py
 /api/v1/processes/update/process_quota/<process_id>
 ```
 
-## Add a new task
+### Add a new task
 ```
 /api/v1/processes
 ```
-## Parameters to send in your POST 
+### Parameters to send in your POST 
 ```
 process_id (Integer)
 process_name (String)
