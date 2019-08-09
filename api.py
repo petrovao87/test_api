@@ -10,8 +10,12 @@ api = Api(app)
 
 @app.route('/', methods=['GET'])
 def home():
-    return '''<h1>Test simple API</h1>
-<p>A prototype API for distant reading of science fiction novels.</p>'''
+    return '''<h1>Simple test-API</h1>
+<h2>test_API</h2>
+<p>This application allows you to work with simple API.</p>
+<p> For more information visit:
+https://github.com/petrovao87/test_api
+</p>'''
 
 
 parser = reqparse.RequestParser()
@@ -225,12 +229,15 @@ class ProcessesList(Resource):
 
     def post(self):
         args = parser.parse_args()
-        user_query = db_session.query(ProcessPerformer).filter(ProcessPerformer.process_performer_id == args.process_performer_id).first()
-        process = Process(process_id=args.process_id, process_name=args.process_name, process_description=args.process_description, activity_flag=args.activity_flag, process_performer_id=args.process_performer_id)
-        parameter = ProcessParameter(parameter_name=args.parameter_name, parameter_value=args.parameter_value, process_id=args.process_id)
-        start_condition = ProcessStartCondition(condition_type=args.condition_type, condition_value=args.condition_value, process_id=args.process_id)
-        performer = ProcessPerformer(process_performer_id=args.process_performer_id, performer_name=args.performer_name, performer_description=args.performer_description)
-        quota = ProcessQuota(quota_type=args.quota_type, quota_value=args.quota_value, process_id=args.process_id)
+        try:
+            user_query = db_session.query(ProcessPerformer).filter(ProcessPerformer.process_performer_id == args.process_performer_id).first()
+            process = Process(process_id=int(args.process_id), process_name=str(args.process_name), process_description=str(args.process_description), activity_flag=str(args.activity_flag), process_performer_id=int(args.process_performer_id))
+            parameter = ProcessParameter(parameter_name=str(args.parameter_name), parameter_value=str(args.parameter_value), process_id=int(args.process_id))
+            start_condition = ProcessStartCondition(condition_type=str(args.condition_type), condition_value=str(args.condition_value), process_id=int(args.process_id))
+            performer = ProcessPerformer(process_performer_id=int(args.process_performer_id), performer_name=str(args.performer_name), performer_description=str(args.performer_description))
+            quota = ProcessQuota(quota_type=str(args.quota_type), quota_value=str(args.quota_value), process_id=int(args.process_id))
+        except ValueError:
+            abort(404, message="Please input correct arguments")
 
         if user_query is None:
             db_session.add(performer)
@@ -242,7 +249,8 @@ class ProcessesList(Resource):
         try:
             db_session.commit()
         except exc.IntegrityError:
-           abort(404, message="Some parameters is already exist in DB")
+            abort(404, message="Some parameters is already exist in DB")
+
         return args, 200
 
 
