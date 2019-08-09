@@ -17,7 +17,7 @@ $ cd test_api
 $ pip install -r requirements.txt
 ```
 
-##### Connection to your PostgreSQL server and Create the database 
+#### Connection to your PostgreSQL server and Create the database 
 
 ##### create connection to your db in db.py
 ```
