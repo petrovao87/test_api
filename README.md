@@ -27,7 +27,7 @@ engine = create_engine('postgresql://USERNAME:PASSWORD@localhost/YOUR_DB_NAME)
 ```
 $ python db.py
 ```
-
+# test_API methods:
 ## Running the app
 ```
 $ python api.py
