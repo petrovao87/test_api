@@ -19,7 +19,7 @@ $ pip install -r requirements.txt
 
 #### Connection to your PostgreSQL server and Create the database 
 
-##### create connection to your db in db.py
+##### create connection to your db. Change db.py
 ```
 engine = create_engine('postgresql://USERNAME:PASSWORD@localhost/YOUR_DB_NAME)
 ```
