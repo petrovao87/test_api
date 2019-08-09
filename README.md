@@ -17,18 +17,23 @@ $ cd test_api
 $ pip install -r requirements.txt
 ```
 
-##### Create the database
+##### Connection to your PostgreSQL server and Create the database 
 
+##### create connection to your db in db.py
+```
+engine = create_engine('postgresql://USERNAME:PASSWORD@localhost/YOUR_DB_NAME)
+```
+##### and create schemas
 ```
 $ python db.py
 ```
 
-## Running the app and Add Environment Variables
+## Running the app
 ```
 $ python api.py
 ```
 
-## GET the list of Processes
+## GET the list of all Processes
 ```
 /api/v1/processes
 ```
@@ -44,7 +49,7 @@ $ python api.py
 ```
 
 ## Update a task
-Update value in tables: Process Parameter, Process Start Condition, Process Performer and Process Quota
+#####Update value in tables: Process Parameter, Process Start Condition, Process Performer and Process Quota
 ```
 /api/v1/processes/update/process_parameter/<process_id>
 /api/v1/processes/update/process_start_condition/<process_id>
@@ -71,4 +76,25 @@ performer_name (String)
 performer_description (String)
 quota_type (String)
 quota_value (String)
+```
+
+##### for example:
+
+```
+url = 'http://localhost:5000/api/v1/processes'
+data = {'process_id': 1,
+        'process_name': 'process_name',
+        'process_description': 'process_description',
+        'activity_flag': 'activity_flag',
+        'process_performer_id': 1,
+        'parameter_name': 'parameter_name',
+        'parameter_value': 'parameter_value',
+        'condition_type': 'condition_type',
+        'condition_value': 'condition_value',
+        'performer_name': 'performer_name',
+        'performer_description': 'performer_description',
+        'quota_type': 'quota_type',
+        'quota_value': 'quota_value'}
+        
+req = post(url, json=data)
 ```
