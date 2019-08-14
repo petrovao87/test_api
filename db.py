@@ -1,6 +1,6 @@
 import psycopg2
 
-from sqlalchemy import create_engine, Column, Integer, String, Float, Text, DateTime, ForeignKey, Table, Boolean
+from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
 from sqlalchemy.orm import scoped_session, sessionmaker, relationship
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -26,7 +26,11 @@ class Process(Base):
     process_performer = relationship('ProcessPerformer')
     process_quota = relationship('ProcessQuota')
 
-    def __init__(self, process_id=None, process_name=None, process_description=None, activity_flag=None, process_performer_id=None):
+    def __init__(self, process_id=None,
+                 process_name=None,
+                 process_description=None,
+                 activity_flag=None,
+                 process_performer_id=None):
         self.process_id = process_id
         self.process_name = process_name
         self.process_description = process_description
@@ -41,7 +45,9 @@ class ProcessParameter(Base):
     parameter_value = Column(String(120))
     process_id = Column(Integer, ForeignKey('process.process_id'))
 
-    def __init__(self, parameter_name=None, parameter_value=None, process_id=None):
+    def __init__(self, parameter_name=None,
+                 parameter_value=None,
+                 process_id=None):
         self.parameter_name = parameter_name
         self.parameter_value = parameter_value
         self.process_id = process_id
@@ -54,7 +60,9 @@ class ProcessStartCondition(Base):
     condition_value = Column(String(120))
     process_id = Column(Integer, ForeignKey('process.process_id'))
 
-    def __init__(self, condition_type=None, condition_value=None, process_id=None):
+    def __init__(self, condition_type=None,
+                 condition_value=None,
+                 process_id=None):
         self.condition_type = condition_type
         self.condition_value = condition_value
         self.process_id = process_id
@@ -68,7 +76,9 @@ class ProcessPerformer(Base):
     performer_description = Column(String(120))
     process_performer = relationship('Process')
 
-    def __init__(self, process_performer_id=None, performer_name=None, performer_description=None):
+    def __init__(self, process_performer_id=None,
+                 performer_name=None,
+                 performer_description=None):
         self.process_performer_id = process_performer_id
         self.performer_name = performer_name
         self.performer_description = performer_description
@@ -81,7 +91,9 @@ class ProcessQuota(Base):
     quota_value = Column(String(120))
     process_id = Column(Integer, ForeignKey('process.process_id'))
 
-    def __init__(self, quota_type=None, quota_value=None, process_id=None):
+    def __init__(self, quota_type=None,
+                 quota_value=None,
+                 process_id=None):
         self.quota_type = quota_type
         self.quota_value = quota_value
         self.process_id = process_id
