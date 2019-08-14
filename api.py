@@ -43,6 +43,14 @@ parser.add_argument('performer_description')
 parser.add_argument('quota_type')
 parser.add_argument('quota_value')
 
+def arg_parse():
+    args = parser.parse_args()
+    dict_to_update = {}
+    for i in args:
+        if args[i] is not None:
+            dict_to_update[i] = args[i]
+    return dict_to_update
+
 
 # shows a single process item
 class Processes(Resource):
@@ -83,11 +91,7 @@ class Processes(Resource):
 # update Process table
 class ProcessesUpdate(Resource):
     def put(self, process_id):
-        args = parser.parse_args()
-        dict_to_update = {}
-        for i in args:
-            if args[i] is not None:
-                dict_to_update[i] = args[i]
+        dict_to_update = arg_parse()
         process_performer_id = dict_to_update.get('process_performer_id')
         user_query = db_session.query(ProcessPerformer).\
             filter(ProcessPerformer.process_performer_id == process_performer_id).first()
@@ -102,11 +106,7 @@ class ProcessesUpdate(Resource):
 # update Process Parameter table
 class ProcessesParameterUpdate(Resource):
     def put(self, process_id):
-        args = parser.parse_args()
-        dict_to_update = {}
-        for i in args:
-            if args[i] is not None:
-                dict_to_update[i] = args[i]
+        dict_to_update = arg_parse()
         user_query = db_session.query(ProcessParameter).filter(ProcessParameter.process_id == process_id)
         try:
             user_query.update(dict_to_update)
@@ -129,11 +129,7 @@ class ProcessesParameterUpdate(Resource):
 # update Process Start Condition table
 class ProcessesStartConditionUpdate(Resource):
     def put(self, process_id):
-        args = parser.parse_args()
-        dict_to_update = {}
-        for i in args:
-            if args[i] is not None:
-                dict_to_update[i] = args[i]
+        dict_to_update = arg_parse()
         user_query = db_session.query(ProcessStartCondition).filter(ProcessStartCondition.process_id == process_id)
         try:
             user_query.update(dict_to_update)
@@ -156,11 +152,7 @@ class ProcessesStartConditionUpdate(Resource):
 # update Process Performer table
 class ProcessesPerformer(Resource):
     def put(self, process_id):
-        args = parser.parse_args()
-        dict_to_update = {}
-        for i in args:
-            if args[i] is not None:
-                dict_to_update[i] = args[i]
+        dict_to_update = arg_parse()
         user_query = db_session.query(ProcessPerformer).filter(ProcessPerformer.process_performer_id == process_id)
         try:
             user_query.update(dict_to_update)
@@ -182,11 +174,7 @@ class ProcessesPerformer(Resource):
 # update Process Quota table
 class ProcessesQuota(Resource):
     def put(self, process_id):
-        args = parser.parse_args()
-        dict_to_update = {}
-        for i in args:
-            if args[i] is not None:
-                dict_to_update[i] = args[i]
+        dict_to_update = arg_parse()
         user_query = db_session.query(ProcessQuota).filter(ProcessQuota.process_id == process_id)
         try:
             user_query.update(dict_to_update)
@@ -236,12 +224,26 @@ class ProcessesList(Resource):
     def post(self):
         args = parser.parse_args()
         try:
-            user_query = db_session.query(ProcessPerformer).filter(ProcessPerformer.process_performer_id == args.process_performer_id).first()
-            process = Process(process_id=int(args.process_id), process_name=str(args.process_name), process_description=str(args.process_description), activity_flag=str(args.activity_flag), process_performer_id=int(args.process_performer_id))
-            parameter = ProcessParameter(parameter_name=str(args.parameter_name), parameter_value=str(args.parameter_value), process_id=int(args.process_id))
-            start_condition = ProcessStartCondition(condition_type=str(args.condition_type), condition_value=str(args.condition_value), process_id=int(args.process_id))
-            performer = ProcessPerformer(process_performer_id=int(args.process_performer_id), performer_name=str(args.performer_name), performer_description=str(args.performer_description))
-            quota = ProcessQuota(quota_type=str(args.quota_type), quota_value=str(args.quota_value), process_id=int(args.process_id))
+            user_query = db_session.query(ProcessPerformer).\
+                filter(ProcessPerformer.process_performer_id == args.process_performer_id).first()
+
+            process = Process(process_id=int(args.process_id),
+                              process_name=str(args.process_name),
+                              process_description=str(args.process_description),
+                              activity_flag=str(args.activity_flag),
+                              process_performer_id=int(args.process_performer_id))
+            parameter = ProcessParameter(parameter_name=str(args.parameter_name),
+                                         parameter_value=str(args.parameter_value),
+                                         process_id=int(args.process_id))
+            start_condition = ProcessStartCondition(condition_type=str(args.condition_type),
+                                                    condition_value=str(args.condition_value),
+                                                    process_id=int(args.process_id))
+            performer = ProcessPerformer(process_performer_id=int(args.process_performer_id),
+                                         performer_name=str(args.performer_name),
+                                         performer_description=str(args.performer_description))
+            quota = ProcessQuota(quota_type=str(args.quota_type),
+                                 quota_value=str(args.quota_value),
+                                 process_id=int(args.process_id))
         except ValueError:
             abort(204, message="Please input correct arguments")
 
