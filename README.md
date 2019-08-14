@@ -4,11 +4,19 @@
 
 ## Setting up
 
+
 ##### Clone the repo
 
 ```
 $ git clone https://github.com/petrovao87/test_api.git
 $ cd test_api
+```
+
+##### Virtual Environment install & activate
+```
+$ pip install virtualenv
+$ env\scripts\activate  (for Windows systems)
+$ env\bin\activate  (for Unix systems)
 ```
 
 ##### Install the dependencies
@@ -87,18 +95,18 @@ from requests import post
 
 url = 'http://localhost:5000/api/v1/processes'
 data = {'process_id': 1,
-        'process_name': 'process_name',
-        'process_description': 'process_description',
-        'activity_flag': 'activity_flag',
+        'process_name': 'your process name',
+        'process_description': 'simple precess description',
+        'activity_flag': 'active',
         'process_performer_id': 1,
-        'parameter_name': 'parameter_name',
-        'parameter_value': 'parameter_value',
-        'condition_type': 'condition_type',
-        'condition_value': 'condition_value',
-        'performer_name': 'performer_name',
-        'performer_description': 'performer_description',
-        'quota_type': 'quota_type',
-        'quota_value': 'quota_value'}
+        'parameter_name': 'your parameter name',
+        'parameter_value': 'your parameter value',
+        'condition_type': 'your condition_type',
+        'condition_value': 'youur condition_value',
+        'performer_name': 'Alex Petrov',
+        'performer_description': 'Alex is the process owner',
+        'quota_type': 'your quota type',
+        'quota_value': 'your quota value'}
         
 req = post(url, json=data)
 ```
