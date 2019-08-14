@@ -77,7 +77,7 @@ class Processes(Resource):
                       'quota_value': user_query.process_quota[0].quota_value}}
             return result, 200
         else:
-            return abort(404, message="process {} doesn't exist".format(process_id))
+            return abort(204, message="process {} doesn't exist".format(process_id))
 
 
 # update Process table
@@ -95,7 +95,7 @@ class ProcessesUpdate(Resource):
             db_session.query(Process).filter(Process.process_id == process_id).update(dict_to_update)
             db_session.commit()
         else:
-            return abort(404, message="process performer {} doesn't exist".format(process_performer_id))
+            return abort(204, message="process performer {} doesn't exist".format(process_performer_id))
         return dict_to_update, 201
 
 
@@ -111,7 +111,7 @@ class ProcessesParameterUpdate(Resource):
         try:
             user_query.update(dict_to_update)
         except exc.OperationalError:
-            abort(404, message="process {} has not this argument".format(process_id))
+            abort(204, message="process {} has not this argument".format(process_id))
         result = {}
         user_query = user_query.first()
         if user_query is not None:
@@ -123,7 +123,7 @@ class ProcessesParameterUpdate(Resource):
                  }
             return result, 201
         else:
-            return abort(404, message="process {} doesn't exist".format(process_id))
+            return abort(204, message="process {} doesn't exist".format(process_id))
 
 
 # update Process Start Condition table
@@ -138,7 +138,7 @@ class ProcessesStartConditionUpdate(Resource):
         try:
             user_query.update(dict_to_update)
         except exc.OperationalError:
-            abort(404, message="process {} has not this argument".format(process_id))
+            abort(204, message="process {} has not this argument".format(process_id))
         result = {}
         user_query = user_query.first()
         if user_query is not None:
@@ -150,7 +150,7 @@ class ProcessesStartConditionUpdate(Resource):
                  }
             return result, 201
         else:
-            return abort(404, message="process {} doesn't exist".format(process_id))
+            return abort(204, message="process {} doesn't exist".format(process_id))
 
 
 # update Process Performer table
@@ -165,7 +165,7 @@ class ProcessesPerformer(Resource):
         try:
             user_query.update(dict_to_update)
         except exc.OperationalError:
-            abort(404, message="process performer {} has not this argument".format(process_id))
+            abort(204, message="process performer {} has not this argument".format(process_id))
         result = {}
         user_query = user_query.first()
         if user_query is not None:
@@ -176,7 +176,7 @@ class ProcessesPerformer(Resource):
                  'performer_description': user_query.performer_description}
             return result, 201
         else:
-            return abort(404, message="process {} doesn't exist".format(process_id))
+            return abort(204, message="process {} doesn't exist".format(process_id))
 
 
 # update Process Quota table
@@ -191,7 +191,7 @@ class ProcessesQuota(Resource):
         try:
             user_query.update(dict_to_update)
         except exc.OperationalError:
-            abort(404, message="process {} has not this argument".format(process_id))
+            abort(204, message="process {} has not this argument".format(process_id))
         result = {}
         user_query = user_query.first()
         if user_query is not None:
@@ -201,7 +201,7 @@ class ProcessesQuota(Resource):
                  'quota_value': user_query.quota_value}
             return result, 201
         else:
-            return abort(404, message="process {} doesn't exist".format(process_id))
+            return abort(204, message="process {} doesn't exist".format(process_id))
 
 
 # shows a list of all Processes tables, and lets you POST to add new Process
@@ -243,7 +243,7 @@ class ProcessesList(Resource):
             performer = ProcessPerformer(process_performer_id=int(args.process_performer_id), performer_name=str(args.performer_name), performer_description=str(args.performer_description))
             quota = ProcessQuota(quota_type=str(args.quota_type), quota_value=str(args.quota_value), process_id=int(args.process_id))
         except ValueError:
-            abort(404, message="Please input correct arguments")
+            abort(204, message="Please input correct arguments")
 
         if user_query is None:
             db_session.add(performer)
@@ -255,7 +255,7 @@ class ProcessesList(Resource):
         try:
             db_session.commit()
         except exc.IntegrityError:
-            abort(404, message="Some parameters is already exist in DB")
+            abort(204, message="Some parameters is already exist in DB")
 
         return args, 200
 
@@ -264,7 +264,7 @@ class ProcessesDelete(Resource):
     def delete(self, process_id):
         user_query = db_session.query(Process).filter(Process.process_id == process_id)
         if len(user_query.all()) == 0:
-            return abort(404, message="process {} doesn't exist".format(process_id))
+            return abort(204, message="process {} doesn't exist".format(process_id))
         performer = user_query.first().process_performer_id
         processes_count = db_session.query(Process).filter(Process.process_performer_id == performer).all()
         if len(processes_count) > 1:
