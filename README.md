@@ -55,18 +55,49 @@ $ python api.py
 ```
 /api/v1/processes/delete/process/<process_id>
 ```
+##### or:
+```
+from requests import delete
+
+
+url = 'http://localhost:5000/api/v1/processes/delete/process/1'
+
+req = delete(url)
+```
+
+##### for example:
+
+```
+curl http://localhost:5000/api/v1/processes/delete/process/1 -X DELETE
+```
 
 ### Update a task
 
 ##### Update value in tables: Process Parameter, Process Start Condition, Process Performer and Process Quota
 ```
+/api/v1/processes/update/process/<process_id>
 /api/v1/processes/update/process_parameter/<process_id>
 /api/v1/processes/update/process_start_condition/<process_id>
 /api/v1/processes/update/process_performer/<process_id>
 /api/v1/processes/update/process_quota/<process_id>
 ```
 
-### Add a new task
+##### for example:
+```
+curl http://localhost:5000/api/v1/processes/update/process/1 -d "process_name=another process name" -X PUT
+```
+##### or:
+```
+from requests import put
+
+
+url = 'http://localhost:5000/api/v1/processes/update/process/1'
+data = {'process_name': 'name_name'}
+
+req = put(url, json=data)
+```
+
+### Add a new process
 ```
 /api/v1/processes
 ```
